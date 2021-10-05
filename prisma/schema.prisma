@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String           @id @default(uuid())
+  nombre         String
+  apellido       String
+  email          String           @unique
+  userAuth       UserAuth         @relation(fields: [userAuthId], references: [id])
+  userAuthId     String
+  FavoriteEstate FavoriteEstate[]
+  Report         Report[]
+}
+
+model UserAuth {
+  id         String  @id @default(uuid())
+  email      String  @unique
+  password   String
+  isVerified Boolean
+  User       User?
+}
+
+model Estate {
+  id             String           @id @default(uuid())
+  websiteCode    String           @unique
+  title          String
+  price          String
+  size           String
+  type           String
+  location       String
+  description    String
+  FavoriteEstate FavoriteEstate[]
+}
+
+model FavoriteEstate {
+  id       String @id @default(uuid())
+  estate   Estate @relation(fields: [estateId], references: [id])
+  estateId String
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+}
+
+model Report {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  expenses    Expense[]
+}
+
+model Expense {
+  id       String   @id @default(uuid())
+  title    String
+  quantity Float
+  date     DateTime
+  Report   Report?  @relation(fields: [reportId], references: [id])
+  reportId String?
+}
