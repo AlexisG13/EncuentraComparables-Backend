@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { EstateService } from './estate.service';
-import { PuppeteerModule } from 'nest-puppeteer';
+import { EstateController } from './estate.controller';
+import { puppeteerProvider } from './puppeteer.provider';
 
 @Module({
-  providers: [EstateService],
-  imports: [PuppeteerModule.forRoot()],
+  providers: [puppeteerProvider, EstateService],
+  imports: [],
+  controllers: [EstateController],
 })
 export class EstateModule {}
