@@ -9,9 +9,11 @@ export const puppeteerProvider = {
       executablePath: undefined,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     };
-    const useCustomChromium = configService.get<boolean>('CUSTOM_CHROMIUM');
-    if (useCustomChromium) {
+    const useCustomChromium = configService.get<string>('CUSTOM_CHROMIUM');
+    if (useCustomChromium === 'true') {
       launchOptions.executablePath = '/usr/bin/chromium';
+    } else {
+      delete launchOptions.executablePath;
     }
     return await puppeteer.launch(launchOptions);
   },
