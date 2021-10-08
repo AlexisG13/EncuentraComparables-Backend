@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install --only=development 
+RUN npm i @nestjs/cli && npm install --only=development 
 
 COPY . .
 
