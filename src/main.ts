@@ -13,9 +13,10 @@ async function bootstrap() {
     .setDescription('TORTY QLERO')
     .setVersion('1.0')
     .addTag('encuentra_comparables')
+    .addServer('/encuentra_comparables')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/encuentra_comparables/api', app, document);
+  SwaggerModule.setup('/api', app, document);
   await app.listen(3000);
 }
 bootstrap();
