@@ -15,7 +15,7 @@ async function bootstrap() {
     .addTag('encuentra_comparables')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('/encuentra_comparables/api', app, document);
   await app.listen(3000);
 }
 bootstrap();
