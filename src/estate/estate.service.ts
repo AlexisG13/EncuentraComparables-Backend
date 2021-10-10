@@ -26,7 +26,9 @@ export class EstateService {
     filters: EstateSearchFilters,
   ): Promise<IEstate[]> {
     const page = await this.browser.newPage();
-    await page.goto(provider.buildUrl(filters));
+    await page.goto(provider.buildUrl(filters), {
+      waitUntil: 'domcontentloaded',
+    });
     const content = await page.content();
     await page.close();
     return provider.parse(content);
