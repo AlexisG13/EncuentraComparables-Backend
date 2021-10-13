@@ -8,7 +8,17 @@ export class Encuentra24 implements EstateProvider {
     'https://www.encuentra24.com/el-salvador-es/searchresult/bienes-raices-venta-de-propiedades?q=f_currency.USD';
 
   buildUrl(query: EstateSearchFilters): string {
-    return this.baseUrl;
+    let url = this.baseUrl;
+    if (query.min_price && query.max_price) {
+      url += `&q=f_price.${query.min_price}-${query.max_price}`;
+    }
+    if (query.min_price) {
+      url += `&q=f_price.${query.min_price}-`;
+    }
+    if (query.min_price) {
+      url += `&q=f_price.-${query.max_price}`;
+    }
+    return url;
   }
 
   parse(response: string): IEstate[] {
@@ -23,16 +33,28 @@ export class Encuentra24 implements EstateProvider {
           location: $('.ann-info-item', el).text(),
           size: parseFloat($('.value:first', el).text()),
           description: $('.ann-box-desc', el).text(),
+          detailsHref:
+            'https://encuentra24.com' + $('.ann-box-title', el).attr('href'),
+          imgHref: $('.carousel-inner .item.active img', el).attr(
+            'data-original',
+          ),
         };
       });
   }
 }
 
 export class BienesRaicesEnElSalvador implements EstateProvider {
-  baseUrl = 'https://www.bienesraicesenelsalvador.com/properties';
+  readonly baseUrl = 'https://www.bienesraicesenelsalvador.com/properties?';
 
   buildUrl(query: EstateSearchFilters): string {
-    return this.baseUrl;
+    let url = this.baseUrl;
+    if (query.max_price) {
+      url += `&max_price=${query.max_price}`;
+    }
+    if (query.min_price) {
+      url += `&min_price=${query.min_price}`;
+    }
+    return url;
   }
 
   parse(response: string): IEstate[] {
@@ -58,17 +80,31 @@ export class BienesRaicesEnElSalvador implements EstateProvider {
             return size ? parseFloat(size) : null;
           })(),
           description: 'N/A',
+          detailsHref:
+            'https://bienesraicesenelsalvador.com' +
+            $('.related-property', el).attr('href'),
+          imgHref: $('.property-photo img', el).attr('src'),
         };
       });
   }
 }
 
 export class BienesRaicesDienca implements EstateProvider {
-  baseUrl =
+  readonly baseUrl =
     'https://bienesraicesdienca.com/?s=&es_search%5Bprice%5D%5Bmin%5D=&es_search%5Bprice%5D%5Bmax%5D=&post_type=properties';
 
   buildUrl(query: EstateSearchFilters): string {
-    return this.baseUrl;
+    let url = this.baseUrl;
+    if (query.s) {
+      url = url.replace('s=', `s=${query.s}`);
+    }
+    if (query.min_price) {
+      url = url.replace('5Bmin%5D=', `5Bmin%5D=${query.min_price}`);
+    }
+    if (query.max_price) {
+      url = url.replace('5Bmax%5D=', `5Bmax%5D=${query.max_price}`);
+    }
+    return url;
   }
 
   parse(response: string): IEstate[] {
@@ -88,13 +124,15 @@ export class BienesRaicesDienca implements EstateProvider {
           size: parseFloat($('.es-bottom-icon', el).text()),
           location: title,
           description: 'N/A',
+          detailsHref: $('.es-thumbnail a', el).attr('href'),
+          imgHref: $('.es-thumbnail a img', el).attr('src'),
         };
       });
   }
 }
 
 export class RemaxCentral implements EstateProvider {
-  baseUrl = 'https://remax-central.com.sv/es/busqueda/';
+  readonly baseUrl = 'https://remax-central.com.sv/es/busqueda/';
 
   filters = new Map([
     ['s', 'query'],
@@ -129,6 +167,8 @@ export class RemaxCentral implements EstateProvider {
           location: $('.property-description p:nth-child(3)', el).text(),
           size: null,
           description: 'N/A',
+          detailsHref: $('a', el).attr('href'),
+          imgHref: $('img', el).attr('src'),
         };
       });
   }
