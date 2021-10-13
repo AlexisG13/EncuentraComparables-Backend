@@ -1,5 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Browser } from 'puppeteer';
+import { Injectable } from '@nestjs/common';
+import axios, { AxiosResponse } from 'axios';
+import * as https from 'https';
 import { EstateSearchFilters } from './dtos/get-states-query.dto';
 import {
   BienesRaicesDienca,
@@ -12,7 +13,7 @@ import { IEstate } from './interfaces/estate.interface';
 
 @Injectable()
 export class EstateService {
-  constructor(@Inject('PUPPETEER_BROWSER') private browser: Browser) {}
+  constructor() {}
 
   private availableProviders = [
     new Encuentra24(),
@@ -25,13 +26,17 @@ export class EstateService {
     provider: EstateProvider,
     filters: EstateSearchFilters,
   ): Promise<IEstate[]> {
-    const page = await this.browser.newPage();
-    await page.goto(provider.buildUrl(filters), {
-      waitUntil: 'domcontentloaded',
-    });
-    const content = await page.content();
-    await page.close();
-    return provider.parse(content);
+    try {
+      const res: AxiosResponse<string, any> = await axios.get(
+        provider.buildUrl(filters),
+        {
+          httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+        },
+      );
+      return provider.parse(res.data);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   async searchEstates(filters: EstateSearchFilters): Promise<IEstate[]> {
