@@ -4,4 +4,6 @@ export interface IEstate {
   location: string;
   size: number;
   description: string;
+  detailsHref: string;
+  imgHref: string;
 }
