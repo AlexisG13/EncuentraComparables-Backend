@@ -2,6 +2,7 @@ import { EstateProvider } from '../interfaces/estate-provider.interface';
 import { IEstate } from '../interfaces/estate.interface';
 import * as cheerio from 'cheerio';
 import { EstateSearchFilters } from '../dtos/get-states-query.dto';
+import { v4 as uuidv4 } from 'uuid';
 
 export class Encuentra24 implements EstateProvider {
   baseUrl =
@@ -28,6 +29,7 @@ export class Encuentra24 implements EstateProvider {
       .toArray()
       .map((el) => {
         return {
+          id: uuidv4(),
           title: $('.ann-box-title', el).text(),
           price: parseFloat($('.ann-price-2nd div', el).text().split('$')[1]),
           location: $('.ann-info-item', el).text(),
@@ -64,6 +66,7 @@ export class BienesRaicesEnElSalvador implements EstateProvider {
       .toArray()
       .map((el) => {
         return {
+          id: uuidv4(),
           title: $('.property-header h4 ', el).text(),
           price: (() => {
             const price = $('.listing-type-price', el)
@@ -114,6 +117,7 @@ export class BienesRaicesDienca implements EstateProvider {
       .map((el) => {
         const title = $('.es-col-view h2 a', el).text();
         return {
+          id: uuidv4(),
           title,
           price: parseFloat(
             $('.es-col-view .es-price', el)
@@ -160,6 +164,7 @@ export class RemaxCentral implements EstateProvider {
       .toArray()
       .map((el) => {
         return {
+          id: uuidv4(),
           title: $('.property-description p:first strong', el).text(),
           price: parseFloat(
             $('.property-price', el).text().split('$')[1].replace(/,/g, ''),
