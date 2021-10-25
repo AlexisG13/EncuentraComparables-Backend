@@ -65,6 +65,7 @@ export class EstateService {
   getAverage<T>(array: Array<T>, mapper: (element: T) => number): number {
     return array
       .map(mapper)
+      .filter(Boolean) // don't include falsy values
       .reduce((avg, curr, _, { length }) => avg + curr / length);
   }
 }
