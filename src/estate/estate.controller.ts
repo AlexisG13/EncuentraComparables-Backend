@@ -8,6 +8,6 @@ export class EstateController {
 
   @Get()
   getAllEstates(@Query() filters: EstateSearchFilters) {
-    return this.estateService.searchEstates(filters);
+    return this.estateService.search(filters);
   }
 }
