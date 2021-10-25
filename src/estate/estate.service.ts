@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
 import * as https from 'https';
 import { EstateSearchFilters } from './dtos/get-states-query.dto';
+import { SearchEstatesResponse } from './dtos/search-estates-response.dto';
 import {
   BienesRaicesDienca,
   BienesRaicesEnElSalvador,
@@ -45,5 +46,25 @@ export class EstateService {
     );
     const estates = await Promise.all(estateRequests);
     return estates.reduce((acum, curr) => acum.concat(curr));
+  }
+
+  async search(filters: EstateSearchFilters): Promise<SearchEstatesResponse> {
+    const response = new SearchEstatesResponse();
+    response.estates = await this.searchEstates(filters);
+    response.averagePrice = this.getAverage(
+      response.estates,
+      (estate) => estate.price,
+    );
+    response.averageSize = this.getAverage(
+      response.estates,
+      (estate) => estate.size,
+    );
+    return response;
+  }
+
+  getAverage<T>(array: Array<T>, mapper: (element: T) => number): number {
+    return array
+      .map(mapper)
+      .reduce((avg, curr, _, { length }) => avg + curr / length);
   }
 }
