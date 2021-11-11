@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
 import * as https from 'https';
 import { EstateSearchFilters } from './dtos/get-states-query.dto';
@@ -9,6 +13,7 @@ import {
   Encuentra24,
   RemaxCentral,
 } from './estate_providers/encuentra24';
+import { EstateComparisonResult } from './interfaces/estare-comparison-result';
 import { EstateProvider } from './interfaces/estate-provider.interface';
 import { IEstate } from './interfaces/estate.interface';
 
@@ -60,6 +65,38 @@ export class EstateService {
       (estate) => estate.size,
     );
     return response;
+  }
+
+  async compare(
+    estate1: IEstate,
+    estate2: IEstate,
+  ): Promise<EstateComparisonResult> {
+    const pricePercentage = this.compareProperty(estate1, estate2, 'price');
+    const sizePercentage = this.compareProperty(estate1, estate2, 'size');
+    return { pricePercentage, sizePercentage };
+  }
+
+  private compareProperty(
+    estate1: IEstate,
+    estate2: IEstate,
+    field: string,
+  ): number {
+    let bestEstate: IEstate;
+    let worstEstate: IEstate;
+    if (!estate1[field] || !estate2[field])
+      throw new UnprocessableEntityException(
+        `La propiedad no tiene un valor de ${field}`,
+      );
+    if (estate1[field] > estate2[field]) {
+      bestEstate = estate2;
+      worstEstate = estate1;
+    } else {
+      bestEstate = estate1;
+      worstEstate = estate2;
+    }
+    const percentage = bestEstate[field] / worstEstate[field] - 1;
+
+    return parseFloat(percentage.toFixed(2));
   }
 
   getAverage<T>(array: Array<T>, mapper: (element: T) => number): number {
