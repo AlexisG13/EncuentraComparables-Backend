@@ -5,7 +5,7 @@ import { EstateSearchFilters } from '../dtos/get-states-query.dto';
 import { v4 as uuidv4 } from 'uuid';
 
 export class Encuentra24 implements EstateProvider {
-  baseUrl =
+  readonly baseUrl =
     'https://www.encuentra24.com/el-salvador-es/searchresult/bienes-raices-venta-de-propiedades?q=f_currency.USD';
 
   buildUrl(query: EstateSearchFilters): string {
@@ -18,6 +18,9 @@ export class Encuentra24 implements EstateProvider {
     }
     if (query.min_price) {
       url += `&q=f_price.-${query.max_price}`;
+    }
+    if (query.s) {
+      url += `|keyword.${query.s}`;
     }
     return url;
   }
@@ -50,11 +53,8 @@ export class BienesRaicesEnElSalvador implements EstateProvider {
 
   buildUrl(query: EstateSearchFilters): string {
     let url = this.baseUrl;
-    if (query.max_price) {
-      url += `&max_price=${query.max_price}`;
-    }
-    if (query.min_price) {
-      url += `&min_price=${query.min_price}`;
+    if (query.s) {
+      url = `https://www.bienesraicesenelsalvador.com/search?search%5Binternal_id%5D=${query.s}&commit=Ir`;
     }
     return url;
   }
@@ -94,7 +94,7 @@ export class BienesRaicesEnElSalvador implements EstateProvider {
 
 export class BienesRaicesDienca implements EstateProvider {
   readonly baseUrl =
-    'https://bienesraicesdienca.com/?s=&es_search%5Bprice%5D%5Bmin%5D=&es_search%5Bprice%5D%5Bmax%5D=&post_type=properties';
+    'https://bienesraicesdienca.com/?es_search%5Bprice%5D%5Bmin%5D=&es_search%5Bprice%5D%5Bmax%5D=&post_type=properties';
 
   buildUrl(query: EstateSearchFilters): string {
     let url = this.baseUrl;
@@ -106,6 +106,9 @@ export class BienesRaicesDienca implements EstateProvider {
     }
     if (query.max_price) {
       url = url.replace('5Bmax%5D=', `5Bmax%5D=${query.max_price}`);
+    }
+    if (query.s) {
+      url += `&s=${query.s}`;
     }
     return url;
   }

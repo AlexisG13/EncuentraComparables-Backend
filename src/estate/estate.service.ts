@@ -1,9 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
+import { filter } from 'domutils';
+import { query } from 'express';
 import * as https from 'https';
 import { EstateSearchFilters } from './dtos/get-states-query.dto';
 import { SearchEstatesResponse } from './dtos/search-estates-response.dto';
@@ -21,12 +19,12 @@ import { IEstate } from './interfaces/estate.interface';
 export class EstateService {
   constructor() {}
 
-  private availableProviders = [
-    new Encuentra24(),
-    new BienesRaicesDienca(),
-    new RemaxCentral(),
-    new BienesRaicesEnElSalvador(),
-  ];
+  private availableProviders = {
+    encuentra24: new Encuentra24(),
+    dienca: new BienesRaicesDienca(),
+    remax: new RemaxCentral(),
+    bienes_raices: new BienesRaicesEnElSalvador(),
+  };
 
   async getSingleProviderEstates(
     provider: EstateProvider,
@@ -46,11 +44,33 @@ export class EstateService {
   }
 
   async searchEstates(filters: EstateSearchFilters): Promise<IEstate[]> {
-    const estateRequests = Array.from(this.availableProviders).map((provider) =>
+    let searchProviders: EstateProvider[];
+
+    if (filters.providers) {
+      const providers = filters.providers.split(',');
+      searchProviders = Object.keys(this.availableProviders)
+        .filter((s) => providers.includes(s))
+        .map((s) => this.availableProviders[s]);
+    } else {
+      searchProviders = Object.keys(this.availableProviders).map(
+        (s) => this.availableProviders[s],
+      );
+    }
+
+    const estateRequests = searchProviders.map((provider) =>
       this.getSingleProviderEstates(provider, filters),
     );
     const estates = await Promise.all(estateRequests);
-    return estates.reduce((acum, curr) => acum.concat(curr));
+    const resolvedEstates = estates.reduce((acum, curr) => acum.concat(curr));
+    const maxPriceFilter = filters.max_price
+      ? (s: IEstate) => s.price <= filters.max_price
+      : () => true;
+    const minPriceFilter = filters.min_price
+      ? (s: IEstate) => s.price >= filters.min_price
+      : () => true;
+    return resolvedEstates.filter(
+      (s) => maxPriceFilter(s) && minPriceFilter(s),
+    );
   }
 
   async search(filters: EstateSearchFilters): Promise<SearchEstatesResponse> {
