@@ -34,7 +34,12 @@ export class Encuentra24 implements EstateProvider {
         return {
           id: uuidv4(),
           title: $('.ann-box-title', el).text(),
-          price: parseFloat($('.ann-price-2nd div', el).text().split('$')[1]),
+          price: parseFloat(
+            $('.ann-price-2nd div', el)
+              .text()
+              .split('$')[1]
+              .replaceAll(',', ''),
+          ),
           location: $('.ann-info-item', el).text(),
           size: parseFloat($('.value:first', el).text()),
           description: $('.ann-box-desc', el).text(),
